@@ -6,12 +6,14 @@ import com.projectmongo.workshopmongodb.dto.UserDTO;
 import com.projectmongo.workshopmongodb.resources.util.URL;
 import com.projectmongo.workshopmongodb.services.PostService;
 import com.projectmongo.workshopmongodb.services.UserService;
+import jakarta.servlet.ServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -35,6 +37,21 @@ public class PostResource {
         text = URL.decodeParam(text);
 
         List<Post> list = postService.findByTitle(text);
+
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/fullsearch")
+    public ResponseEntity<List<Post>> fullSearch(@RequestParam(value = "text", defaultValue = "") String text,
+                                                 @RequestParam(value = "minDate", defaultValue = "") String minDate,
+                                                 @RequestParam(value = "maxDate", defaultValue = "") String maxDate, ServletRequest servletRequest) {
+
+        text = URL.decodeParam(text);
+
+        Date min = URL.convertDate(minDate, new Date(0L));
+        Date max = URL.convertDate(maxDate, new Date());
+
+        List<Post> list = postService.fullSearch(text, min, max);
 
         return ResponseEntity.ok().body(list);
     }
